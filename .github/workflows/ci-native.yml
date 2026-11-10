@@ -37,10 +37,12 @@ jobs:
 
     - name: Start Flask server
       run: |
-        python manage.py runserver &
-        sleep 5
-
+        python manage.py runserver > flask_server.log 2>&1 &
+        sleep 10
+        
     - name: Smoke test Flask server
       run: |
-        curl -f -s -S http://127.0.0.1:7345/ || (echo "Smoke test failed" && exit 1)
+        # Если curl упадет с ошибкой, мы выведем логи сервера в консоль
+        curl -f -s -S http://127.0.0.1:7345/ || (echo "=== СЕРВЕР НЕ ОТВЕТИЛ! ЛОГИ СЕРВЕРА: ===" && cat flask_server.log && exit 1)
+        
         echo "Smoke test passed: server responded with HTTP 200."
