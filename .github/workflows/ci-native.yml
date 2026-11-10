@@ -32,8 +32,8 @@ jobs:
 
     - name: Initialize SQLite database
       run: |
-        python manage.py create_db  
-      continue-on-error: true        
+        python manage.py create_db
+      continue-on-error: true      
 
     - name: Start Flask server
       run: |
