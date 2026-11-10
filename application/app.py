@@ -2,7 +2,7 @@
 
 from flask import Flask
 from .controllers import blueprints
-from configs import config
+from .configs import config
 from .extensions import db
 
 
