@@ -1,0 +1,46 @@
+name: CI Native Flask Pipeline
+
+on:
+  push:
+    branches: [ "master", "main" ] 
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install flake8
+
+    - name: Lint with flake8
+      run: |
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=120 --statistics
+
+    - name: Initialize SQLite database
+      run: |
+        python manage.py create_db  
+      continue-on-error: true        
+
+    - name: Start Flask server
+      run: |
+        python manage.py runserver &
+        sleep 5
+
+    - name: Smoke test Flask server
+      run: |
+        curl -f -s -S http://127.0.0.1:7345/ || (echo "Smoke test failed" && exit 1)
+        echo "Smoke test passed: server responded with HTTP 200."
